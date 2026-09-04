@@ -14,7 +14,7 @@ def get_session():
         session.close()
 
 
-def token_verify(token, session: Session = Depends(get_session)):
+def token_verify(token = Depends(oauth2_schema), session: Session = Depends(get_session)):
     try:
         jwt_decode = jwt.decode(token, SECRET_KEY, ALGORITHM)
         id_user = jwt_decode.get('sub')
