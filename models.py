@@ -2,6 +2,8 @@ from sqlalchemy import create_engine, Numeric, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from decimal import Decimal
 
+
+
 db = create_engine('sqlite:///meubanco.db')
 
 class Base(DeclarativeBase):
@@ -18,16 +20,7 @@ class Usuario(Base):
     ativo: Mapped[bool] = mapped_column(nullable=False)
     admin: Mapped[bool] = mapped_column(nullable=False)
 
-class Produto(Base):
-
-    __tablename__ = 'produtos'
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    nome : Mapped[str] = mapped_column(nullable=False)
-    preco_unitario : Mapped[Decimal] = mapped_column(Numeric(10, 2),nullable=False)
-    quantidade_disponivel : Mapped[int] = mapped_column(nullable=False)
-    disponivel : Mapped[bool] = mapped_column(nullable=False)
-    categoria: Mapped[str] = mapped_column(nullable=False)
+    user: Mapped[list['Pedido']] = relationship('Pedido', back_populates='usuario')
 
 
 class Pedido(Base):
@@ -39,7 +32,8 @@ class Pedido(Base):
     status : Mapped[str] = mapped_column(nullable=False)
     preco_total : Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
 
-    itens: Mapped[list['ItemPedido']] = relationship() # Se eu tirar essa linha o for vai funcionar ? 
+    itens: Mapped[list['ItemPedido']] = relationship('ItemPedido', back_populates='pedido')  
+    usuario: Mapped['Usuario'] = relationship('Usuario', back_populates='user')
 
     def caucular_preco(self):
         self.preco_total = sum(i.quantidade * i.preco_unitario for i in self.itens)
@@ -55,3 +49,30 @@ class ItemPedido(Base):
     preco_unitario : Mapped[Decimal] = mapped_column(Numeric(10,2), nullable=False)
     observacao : Mapped[str] = mapped_column(nullable=False)
 
+    pedido: Mapped['Pedido'] = relationship('Pedido', back_populates='itens')
+    
+    produto: Mapped['Produto'] = relationship('Produto', back_populates='itens_pedidos')
+
+class Produto(Base):
+
+    __tablename__ = 'produtos'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    nome : Mapped[str] = mapped_column(nullable=False)
+    preco_unitario : Mapped[Decimal] = mapped_column(Numeric(10, 2),nullable=False)
+    quantidade_disponivel : Mapped[int] = mapped_column(nullable=False)
+    disponivel : Mapped[bool] = mapped_column(nullable=False)
+    categoria: Mapped[str] = mapped_column(nullable=False)
+
+    itens_pedidos: Mapped[list['ItemPedido']] = relationship('ItemPedido', back_populates='produto')
+
+
+
+
+
+
+
+
+
+
+  
