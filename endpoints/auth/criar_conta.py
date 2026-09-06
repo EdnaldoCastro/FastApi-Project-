@@ -18,17 +18,16 @@ async def criar_conta(usuarioschema: UsuarioSchema, session: Session = Depends(g
 
     crypt_hash_password = bcrypt_context.hash(usuarioschema.senha)
 
+
     novo_user = Usuario(
         nome = usuarioschema.nome,
         email = usuarioschema.email,
         senha = crypt_hash_password,
-        ativo = usuarioschema.ativo,
-        admin = usuarioschema.admin
+        ativo = True,
+        admin = False
 
     )
 
-    if novo_user.admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail= 'Somente admins pode promover usuários!')   
 
 
     session.add(novo_user)
