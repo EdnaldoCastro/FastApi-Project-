@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from dependencies import get_session
 from sqlalchemy.orm import Session
 from models import Usuario
+from sqlalchemy import select
 from schemas import UsuarioSchema
 from functions import verificar_email
 from security import bcrypt_context
@@ -14,7 +15,7 @@ async def criar_conta(usuarioschema: UsuarioSchema, session: Session = Depends(g
     usuario = verificar_email(usuarioschema.email, session)
     if usuario:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Email ja existe!')
-    
+
     crypt_hash_password = bcrypt_context.hash(usuarioschema.senha)
 
     novo_user = Usuario(
@@ -25,6 +26,11 @@ async def criar_conta(usuarioschema: UsuarioSchema, session: Session = Depends(g
         admin = usuarioschema.admin
 
     )
+
+    if novo_user.admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail= 'Somente admins pode promover usuários!')   
+
+
     session.add(novo_user)
     session.commit()
 
