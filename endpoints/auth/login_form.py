@@ -14,7 +14,7 @@ async def login(formdata: OAuth2PasswordRequestForm = Depends(), session: Sessio
     if not user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Acesso inválido ou crednciais inválidas!')
 
-    acces_token = get_token(user.id, user.nome, user.email, user.ativo, user.admin)
+    acces_token = get_token(user.id)
 
     return {
         'acces_token':acces_token,
