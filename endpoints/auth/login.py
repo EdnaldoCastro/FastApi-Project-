@@ -12,7 +12,7 @@ router = APIRouter()
 async def login(loginschema: LoginSchema, session: Session = Depends(get_session)):
     user = login_def(loginschema.email, loginschema.senha, session)
     if not user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Acesso inválido ou crednciais inválidas!')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Acesso inválido ou credenciais inválidas!')
 
     acces_token = get_token(user.id)
 
