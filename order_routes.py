@@ -39,22 +39,52 @@ async def criar_pedido(session : Session = Depends(get_session), user : Usuario 
             "Dono do Pedido": f'{pedido.usuario.nome}',
             "ID Usuario" : f'{pedido.usuario.id}'}
 
-
-   
-
-    
-
-
-
-
-
-
-
-
-
 #✅ Listar meus pedidos
+@order_router.get('/visualizar')
+async def visualizar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+    buscar_pedidos = select(Pedido).where(Pedido.dono_pedido_id == user.id)
+    pedido = session.scalars(buscar_pedidos).all()
+    if not pedido:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Você ainda não tem pedidos!')
+    return {
+        'pedidos': pedido
+    }
+
+
 #✅ Buscar um pedido específico
+@order_router.get('/buscar/{pedido_id}')
+async def buscar(pedido_id, session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+    if not user.admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa ação!')
+    buscar_pedidos = select(Pedido).where(Pedido.id == pedido_id)
+    pedido = session.scalars(buscar_pedidos).first()
+    if not pedido:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Pedido não existe!')
+    
+    return {
+        'pedidos': pedido
+    }
+
 #✅ Cancelar pedido
+@order_router.delete('/cancelar/{pedido_id}')
+async def cancelar(pedido_id, session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+    buscar_pedidos = select(Pedido).where(Pedido.id == pedido_id)
+    pedido = session.scalars(buscar_pedidos).first()
+
+    if not pedido:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Pedido não existe!')
+    
+    if not user.admin and user.id != pedido.dono_pedido_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa ação!')
+  
+    
+    session.delete(pedido)
+    pedido.caucular_preco()
+    session.commit()
+
+
+
+
 #✅ Atualizar status do pedido
 #item_pedido.py
 #✅ Adicionar item ao pedido
