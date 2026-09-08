@@ -28,8 +28,6 @@ async def criar_conta(usuarioschema: UsuarioSchema, session: Session = Depends(g
 
     )
 
-
-
     session.add(novo_user)
     session.commit()
 
