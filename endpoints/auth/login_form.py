@@ -9,16 +9,15 @@ router = APIRouter()
 
 
 @router.post('/login-form')
-async def login(formdata: OAuth2PasswordRequestForm = Depends(), 
-        session: Session = Depends(get_session)):
+async def login(formdata: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
     user = login_def(formdata.username, formdata.password, session)
     if not user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Acesso inválido ou crednciais inválidas!')
 
-    acces_token = get_token(user.id)
+    acces_token = get_token(user.id, 'access')
 
     return {
-        'acces_token':acces_token,
+        'access_token':acces_token,
         'token_type':'Bearer'
     }
 

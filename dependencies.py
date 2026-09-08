@@ -15,10 +15,12 @@ def get_session():
 
 
 def token_verify(token = Depends(oauth2_schema), session: Session = Depends(get_session)):
+
     try:
         jwt_decode = jwt.decode(token, SECRET_KEY, ALGORITHM)
         id_user = jwt_decode.get('sub')
     except JWTError:
+
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Acesso negado verifique a validade do token!')
     filtrar = select(Usuario).where(Usuario.id == id_user)
     usuario = session.scalars(filtrar).first()

@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from dependencies import get_session
 from sqlalchemy.orm import Session
 from models import Usuario
-from sqlalchemy import select
 from schemas import UsuarioSchema
 from functions import verificar_email
 from security import bcrypt_context
@@ -14,7 +13,7 @@ router = APIRouter()
 async def criar_conta(usuarioschema: UsuarioSchema, session: Session = Depends(get_session)):
     usuario = verificar_email(usuarioschema.email, session)
     if usuario:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Email ja existe!')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Email ja existente tente login!')
 
     crypt_hash_password = bcrypt_context.hash(usuarioschema.senha)
 
