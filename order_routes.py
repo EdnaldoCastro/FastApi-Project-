@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends , HTTPException, status
 from dependencies import get_session, token_verify
 from sqlalchemy.orm import Session
-from models import Usuario, Pedido
+from models import Usuario, Pedido, ItemPedido, Produto
 from decimal import Decimal
 from sqlalchemy import select
-from schemas import StatusSchema
+from schemas import StatusSchema, ItemPedidoSchema
 
 
 order_router = APIRouter(prefix='/order', tags=['title_order'])
@@ -102,6 +102,54 @@ async def mudar_status(pedido_id, status_response: StatusSchema, session : Sessi
     return pedido
 
 #✅ Adicionar item ao pedido
+@order_router.post('/adicionar_itens/{pedido_id}')
+async def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : Session = Depends(get_session),user : Usuario = Depends(token_verify)):
+
+    buscar_pedido = select(Pedido).where(Pedido.id == pedido_id)
+    pedido = session.scalars(buscar_pedido).first()
+
+    if not pedido:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Pedido não encontrado!')
+
+    if not user.admin and user.id != pedido.dono_pedido_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem acesso para essa ação!')
+
+    buscar_produto = select(Produto).where(Produto.id == itens_pedidos.produto_id)
+    produto = session.scalars(buscar_produto).first()
+
+    if not produto:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Produto não encontrado!')
+
+    if produto.quantidade_disponivel == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Produto sem estoque!')
+
+    if produto.quantidade_disponivel < itens_pedidos.quantidade:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Quantidade pedido excede com disponível')
+
+    produto.quantidade_disponivel -= itens_pedidos.quantidade
+    
+    if produto.quantidade_disponivel == 0:
+        produto.disponivel = False
+    
+    novo_pedido = ItemPedido(
+        pedido_id = pedido_id,
+        produto_id = itens_pedidos.produto_id,
+        quantidade = itens_pedidos.quantidade,
+        preco_unitario = produto.preco_unitario,
+        observacao = itens_pedidos.observacao
+    )
+
+    session.add(novo_pedido)
+    pedido.caucular_preco()
+    session.commit()
+    session.refresh(novo_pedido)
+
+    return {'nome_usuario': novo_pedido.pedido.usuario.nome,
+            'produto_nome': produto.nome, 
+            'quantidade': novo_pedido.quantidade,
+            'preco_unitario':novo_pedido.preco_unitario}
+
+
 #✅ Remover item do pedido
 #✅ Alterar quantidade
 #✅ Visualizar itens do pedido

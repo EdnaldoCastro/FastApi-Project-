@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 from enum import Enum
+from decimal import Decimal
 
 class UsuarioSchema(BaseModel):
     
@@ -25,3 +26,10 @@ class StatusSchema(BaseModel):
     status : EnumStatus
     model_config = ConfigDict(from_attributes=True)
 
+class ItemPedidoSchema(BaseModel):
+    
+    produto_id : int
+    quantidade : int
+    observacao : str
+
+    model_config = ConfigDict(from_attributes=True)
