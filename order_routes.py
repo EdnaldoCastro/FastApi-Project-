@@ -6,7 +6,6 @@ from decimal import Decimal
 from sqlalchemy import select
 from schemas import StatusSchema, ItemPedidoSchema
 
-
 order_router = APIRouter(prefix='/order', tags=['title_order'])
 
 @order_router.get('/')
