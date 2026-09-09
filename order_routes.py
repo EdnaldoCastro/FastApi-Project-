@@ -8,10 +8,6 @@ from schemas import StatusSchema, ItemPedidoSchema
 
 order_router = APIRouter(prefix='/order', tags=['title_order'])
 
-@order_router.get('/')
-async def order():
-    return {'mensagem':'você acessou rotas de order'}
-
 #✅ Criar pedido
 @order_router.post('/criar_pedido/admin/{user_id}')
 async def criar_pedido(user_id,session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
