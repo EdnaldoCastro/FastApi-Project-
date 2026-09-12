@@ -36,8 +36,6 @@ async def criar_pedido(session : Session = Depends(get_session), user : Usuario 
             "ID Usuario" : f'{pedido.usuario.id}'}
 
 
-
-
 #✅ Adicionar item ao pedido
 @router.post('/adicionar_itens/{pedido_id}')
 async def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : Session = Depends(get_session),user : Usuario = Depends(token_verify)):
