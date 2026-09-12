@@ -32,3 +32,5 @@ async def buscar(pedido_id, session : Session = Depends(get_session), user : Usu
         'pedidos': pedido
     }
 
+
+#✅ Visualizar itens do pedido

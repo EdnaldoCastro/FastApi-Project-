@@ -24,4 +24,4 @@ async def cancelar(pedido_id, session : Session = Depends(get_session), user : U
     pedido.caucular_preco()
     session.commit()
 
-
+#✅ Remover item do pedido

@@ -25,3 +25,13 @@ async def mudar_status(pedido_id, status_response: StatusSchema, session : Sessi
     session.refresh(pedido)
 
     return pedido
+
+#✅ Alterar quantidade
+# Acessar Pedido
+# Ver se no pedido tem algum produto
+# Validar usuário
+# acessar o produto
+# Ver se o produto existe
+# se a quantidade para adicionar for maior que ta no banco não adiciona
+# caucular se o user pediu 3 e no banco tem 40 se ele adicionar mais no banco vai diminuir
+# não adicionar número negativos

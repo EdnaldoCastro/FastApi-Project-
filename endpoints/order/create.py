@@ -57,6 +57,9 @@ async def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : S
     if not produto:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Produto não encontrado!')
 
+    if itens_pedidos.quantidade <=0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= 'Quantidade tem que ser maior que 0')
+
     if produto.quantidade_disponivel == 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Produto sem estoque!')
 
