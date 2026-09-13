@@ -29,7 +29,7 @@ async def cancelar(pedido_id, session : Session = Depends(get_session), user : U
 @router.delete('/remover_item_pedido/{id_item_pedido}')
 async def remover_item_pedido(id_item_pedido,session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
 
-    buscar_item = select(ItemPedido).where(ItemPedido.id == id_item_pedido)
+    buscar_item = select(ItemPedido).where(ItemPedido.id == id_item_pedido )
     item = session.scalars(buscar_item).first()
 
     if not item:
