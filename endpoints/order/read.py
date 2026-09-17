@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends , HTTPException, status
 from dependencies import get_session, token_verify
 from sqlalchemy.orm import Session
-from models import Usuario, Pedido,ItemPedido
+from models import Usuario, Pedido,ItemPedido, Produto
 from sqlalchemy import select
-
+from schemas import Categoria
 router = APIRouter()
 
 #✅ Listar meus pedidos
@@ -65,3 +65,18 @@ async def visualizar_itens(session: Session = Depends(get_session), user : Usuar
             })
         
     return response
+    
+@router.get('/produtos/categoria')
+async def produtos_categoria(categoria: Categoria,session: Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+    if not user.admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa ação!')
+
+    categ = select(Produto).where(Produto.categoria == categoria)
+    buscar = session.scalars(categ).all()
+
+    if not buscar:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Categoria não encontrada!')
+
+    return{
+        'produtos': buscar
+    }
