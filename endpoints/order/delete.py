@@ -17,13 +17,16 @@ async def remover_item_pedido(id_item_pedido,session : Session = Depends(get_ses
     item = session.scalars(buscar_item).first()
 
     if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Item não encontrado!')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Item não encontrado ou já removido!')
 
     buscar_pedido = select(Pedido).where(Pedido.id == item.pedido_id)
     pedido = session.scalars(buscar_pedido).first()
 
     if not user.admin and user.id != pedido.dono_pedido_id :
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa requisição!')
+
+    if pedido.status == "CANCELADO":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Você não pode fazer alterações em pedidos cancelados!')
 
     session.delete(item)
     pedido.caucular_preco()
@@ -32,4 +35,4 @@ async def remover_item_pedido(id_item_pedido,session : Session = Depends(get_ses
 
     session.commit()
 
-    return {'mensagem':'Item removido com sucesso!'}
+    return {'mensagem': f'{item.produto.nome} removido com sucesso!'}
