@@ -17,9 +17,19 @@ async def mudar_status(pedido_id, status_response: StatusSchema, session : Sessi
 
     if not pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail='Pedido não encontrado!')
-    if not user.admin and user.id != pedido.dono_pedido_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem acesso a esse pedido!')
 
+    if not user.admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem acesso a esse pedido!')
+    
+    if status_response.status == "CANCELADO" and pedido.status == "CANCELADO":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Pedido ja está CANCELADO!')
+    
+    if status_response.status == "PENDENTE" and pedido.status == "PENDENTE":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Pedido ja está PENDENTE!')
+
+    if status_response.status == "FINALIZADO" and pedido.status == "FINALIZADO":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Pedido ja está FINALIZADO!')
+    
     pedido.status = status_response.status
     session.commit()
     session.refresh(pedido)
@@ -41,7 +51,10 @@ async def alterar_quantidade(id_item_pedido, quantidade_adicional:int , session 
 
     if not user.admin and user.id != pedido.dono_pedido_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail= 'Você não tem acesso a esse pedido!')
-    
+
+    if pedido.status == 'CANCELADO':
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Você não pode alterar um pedido que está cancelado!")
+
     if quantidade_adicional <= 0:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Digite um valor inteiro!')
 
@@ -54,4 +67,26 @@ async def alterar_quantidade(id_item_pedido, quantidade_adicional:int , session 
     pedido.caucular_preco()
     session.commit()
     return {'mensagem': f'{quantidade_adicional} {item.produto.nome} adicionado com sucesso!'}
+
+#✅ Cancelar pedido
+@router.patch('/cancelar/{pedido_id}')
+async def cancelar(pedido_id, session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+    buscar_pedidos = select(Pedido).where(Pedido.id == pedido_id)
+    pedido = session.scalars(buscar_pedidos).first()
+
+    if not pedido:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Pedido não existe!')
+    
+    if not user.admin and user.id != pedido.dono_pedido_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa ação!')
+
+    if pedido.status == "CANCELADO":
+
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Pedido ja cancelado!')
+    pedido.status = 'CANCELADO'
+    session.commit()
+
+
+    return {"STATUS":pedido.status,
+            "PEDIDO":pedido}
 

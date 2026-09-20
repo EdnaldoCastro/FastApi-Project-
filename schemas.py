@@ -1,5 +1,6 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 from enum import Enum
+from decimal import Decimal
 
 class UsuarioSchema(BaseModel):
     

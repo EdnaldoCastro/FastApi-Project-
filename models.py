@@ -35,7 +35,7 @@ class Pedido(Base):
     usuario: Mapped['Usuario'] = relationship('Usuario', back_populates='user')
     itens: Mapped[list['ItemPedido']] = relationship('ItemPedido', back_populates='pedido')  
     
-
+    
     def caucular_preco(self):
         self.preco_total = sum(i.quantidade * i.preco_unitario for i in self.itens)
 

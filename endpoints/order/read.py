@@ -54,18 +54,18 @@ async def visualizar_itens(session: Session = Depends(get_session), user : Usuar
     if not lista:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Você ainda não pediu nada!')
 
-    response = []
+    lista_itens = []
 
-    for itens_pedidos in lista:
-        response.append({
-            'nome':itens_pedidos.produto.nome,
-            'preco_unitario':itens_pedidos.preco_unitario,
-            'quantidade':itens_pedidos.quantidade,
-            'preco_total':itens_pedidos.preco_unitario * itens_pedidos.quantidade
-            })
-        
-    return response
-    
+    for itens_product in lista:
+        lista_itens.append({'dono_pedido':itens_product.pedido.usuario.nome,
+                            'produto':itens_product.produto.nome,
+                            'preco_unitario':itens_product.preco_unitario,
+                            'quantidade':itens_product.quantidade,
+                            'total':itens_product.preco_unitario * itens_product.quantidade 
+                            })
+
+    return lista_itens
+
 @router.get('/produtos/categoria')
 async def produtos_categoria(categoria: Categoria,session: Session = Depends(get_session), user : Usuario = Depends(token_verify)):
     if not user.admin:
