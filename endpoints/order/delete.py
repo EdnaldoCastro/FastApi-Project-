@@ -7,8 +7,6 @@ from sqlalchemy import select
 
 router = APIRouter()
 
-
-
 #✅ Remover item do pedido
 @router.delete('/remover_item_pedido/{id_item_pedido}')
 async def remover_item_pedido(id_item_pedido,session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):

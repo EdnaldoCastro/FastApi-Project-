@@ -16,16 +16,24 @@ async def criar_pedido(user_id,session : Session = Depends(get_session), user : 
     '''
     if not user.admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa funcionalidade!')
-
+    
     filtrar = select(Usuario).where(Usuario.id == user_id)
     buscar = session.scalars(filtrar).first()
 
     if not buscar:    
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Usuário não encontrado!')
-    
+
+    filtrar_pedido = select(Pedido).where(Pedido.dono_pedido_id == user_id, Pedido.status == 'PENDENTE')
+    buscar_pedido = session.scalars(filtrar_pedido).all()
+
+    if len(buscar_pedido) >= 3:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Usuários ja tem pedidos pendentes!')
+
     pedido_adm = Pedido(dono_pedido_id=user_id, status = "PENDENTE",preco_total = Decimal("0.00")) 
     session.add(pedido_adm)
     session.commit()
+
+    return {'mensagem': f'Pedido criado para {buscar.nome} de ID {buscar.id}'}
 
         
 @router.post('/criar_pedido')
@@ -44,7 +52,7 @@ async def criar_pedido(session : Session = Depends(get_session), user : Usuario 
 
     session.add(pedido)
     session.commit()
-
+    session.refresh(pedido)
     return pedido
 
     

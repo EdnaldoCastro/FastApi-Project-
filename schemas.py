@@ -1,6 +1,5 @@
 from pydantic import BaseModel, ConfigDict, EmailStr
 from enum import Enum
-from decimal import Decimal
 
 class UsuarioSchema(BaseModel):
     
@@ -18,7 +17,6 @@ class LoginSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class EnumStatus(str, Enum):
-    CANCELADO = 'CANCELADO'
     FINALIZADO = 'FINALIZADO'
     PENDENTE = 'PENDENTE'
 

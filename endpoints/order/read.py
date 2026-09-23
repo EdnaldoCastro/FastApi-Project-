@@ -9,7 +9,7 @@ router = APIRouter()
 #✅ Listar meus pedidos
 @router.get('/visualizar/meus_pedidos')
 async def visualizar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
-    buscar_pedidos = select(Pedido).where(Pedido.dono_pedido_id == user.id)
+    buscar_pedidos = select(Pedido).where(Pedido.dono_pedido_id == user.id, Pedido.status == 'PENDENTE')
     pedido = session.scalars(buscar_pedidos).all()
     if not pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Você ainda não tem pedidos!')
@@ -17,14 +17,16 @@ async def visualizar_pedido(session : Session = Depends(get_session), user : Usu
         'pedidos': pedido
     }
 
-
 #✅ Buscar um pedido específico
 @router.get('/buscar/{pedido_id}')
 async def buscar_pedido_adm(pedido_id, session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+
     if not user.admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa ação!')
+
     buscar_pedidos = select(Pedido).where(Pedido.id == pedido_id)
     pedido = session.scalars(buscar_pedidos).first()
+    
     if not pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Pedido não existe!')
     
@@ -36,7 +38,8 @@ async def buscar_pedido_adm(pedido_id, session : Session = Depends(get_session),
 #✅ Visualizar itens do pedido
 @router.get('/visualizar/itens_pedidos')
 async def visualizar_itens(session: Session = Depends(get_session), user : Usuario = Depends(token_verify)):
-    pedido_select = select(Pedido).where(Pedido.dono_pedido_id == user.id)
+
+    pedido_select = select(Pedido).where(Pedido.dono_pedido_id == user.id, Pedido.status == "PENDENTE")
     pedido = session.scalars(pedido_select).all()
 
     if not pedido:
@@ -50,7 +53,6 @@ async def visualizar_itens(session: Session = Depends(get_session), user : Usuar
 
         lista.extend(itens)
 
-
     if not lista:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Você ainda não pediu nada!')
 
@@ -58,16 +60,17 @@ async def visualizar_itens(session: Session = Depends(get_session), user : Usuar
 
     for itens_product in lista:
         lista_itens.append({'dono_pedido':itens_product.pedido.usuario.nome,
-                            'produto':itens_product.produto.nome,
-                            'preco_unitario':itens_product.preco_unitario,
-                            'quantidade':itens_product.quantidade,
-                            'total':itens_product.preco_unitario * itens_product.quantidade 
-                            })
+            'produto':itens_product.produto.nome,
+            'preco_unitario':itens_product.preco_unitario,
+            'quantidade':itens_product.quantidade,
+            'total':itens_product.preco_unitario * itens_product.quantidade 
+            })
 
     return lista_itens
 
 @router.get('/produtos/categoria')
 async def produtos_categoria(categoria: Categoria,session: Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+
     if not user.admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa ação!')
 

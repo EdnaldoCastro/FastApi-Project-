@@ -20,16 +20,19 @@ async def mudar_status(pedido_id, status_response: StatusSchema, session : Sessi
 
     if not user.admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem acesso a esse pedido!')
-    
-    if status_response.status == "CANCELADO" and pedido.status == "CANCELADO":
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Pedido ja está CANCELADO!')
-    
+
+    if pedido.status == 'CANCELADO':
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Você não pode alterar pedidos ja cancelado!')
+
+    if pedido.status == 'FINALIZADO' and status_response.status == 'PENDENTE':
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Você não pode mudar um pedido ja finalizao!')
+
     if status_response.status == "PENDENTE" and pedido.status == "PENDENTE":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Pedido ja está PENDENTE!')
 
     if status_response.status == "FINALIZADO" and pedido.status == "FINALIZADO":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Pedido ja está FINALIZADO!')
-    
+     
     pedido.status = status_response.status
     session.commit()
     session.refresh(pedido)
@@ -81,12 +84,12 @@ async def cancelar(pedido_id, session : Session = Depends(get_session), user : U
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa ação!')
 
     if pedido.status == "CANCELADO":
-
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Pedido ja cancelado!')
-    pedido.status = 'CANCELADO'
+
+    for c in pedido.itens:
+        c.produto.quantidade_disponivel += c.quantidade
+
+    pedido.status = "CANCELADO"
     session.commit()
 
-
-    return {"STATUS":pedido.status,
-            "PEDIDO":pedido}
-
+    return {'mensagem':f'Pedido de id {pedido.id} cancelado com sucesso essa ação é irreversível!'}
