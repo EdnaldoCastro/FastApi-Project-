@@ -25,7 +25,7 @@ async def mudar_status(pedido_id, status_response: StatusSchema, session : Sessi
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Você não pode alterar pedidos ja cancelado!')
 
     if pedido.status == 'FINALIZADO' and status_response.status == 'PENDENTE':
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Você não pode mudar um pedido ja finalizao!')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Você não pode mudar um pedido ja finalizado!')
 
     if status_response.status == "PENDENTE" and pedido.status == "PENDENTE":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Pedido ja está PENDENTE!')
