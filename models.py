@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine, Numeric, ForeignKey
+from sqlalchemy import create_engine, Numeric, ForeignKey, Date
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from decimal import Decimal
+from datetime import date
 
 
 
@@ -31,6 +32,8 @@ class Pedido(Base):
     dono_pedido_id : Mapped[int] = mapped_column(ForeignKey('usuario.id'),nullable=False )
     status : Mapped[str] = mapped_column(nullable=False)
     preco_total : Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    data_criacao: Mapped[date] = mapped_column(Date, default=date.today,  nullable=False)
+
 
     usuario: Mapped['Usuario'] = relationship('Usuario', back_populates='user')
     itens: Mapped[list['ItemPedido']] = relationship('ItemPedido', back_populates='pedido')  
