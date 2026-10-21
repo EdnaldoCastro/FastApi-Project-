@@ -6,10 +6,11 @@ from decimal import Decimal
 from sqlalchemy import select
 from schemas import ItemPedidoSchema
 
+
 router = APIRouter()
 
 #✅ Criar pedido
-@router.post('/criar_pedido/admin/{user_id}')
+@router.post('/criar_pedido/admin/{user_id}' )
 async def criar_pedido(user_id,session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
     '''
     ESSE ENDPOINT PERMITE QUE SOMENTE USUÁRIOS ADMIN CRIEM PEDIDOS
@@ -33,7 +34,9 @@ async def criar_pedido(user_id,session : Session = Depends(get_session), user : 
     session.add(pedido_adm)
     session.commit()
 
-    return {'mensagem': f'Pedido criado para {buscar.nome} de ID {buscar.id}'}
+    session.refresh(pedido_adm)
+
+    return pedido_adm
 
         
 @router.post('/criar_pedido')
@@ -49,11 +52,11 @@ async def criar_pedido(session : Session = Depends(get_session), user : Usuario 
     if len(filtrar) >= 3:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Você ja tem pedidos pendentes!')
     pedido = Pedido(dono_pedido_id=user.id,status="PENDENTE",preco_total=Decimal("0.00"))
-
+    
     session.add(pedido)
     session.commit()
-    session.refresh(pedido)
-    return pedido
+    data_formatada = pedido.data_criacao.strftime("%d/%m/%Y")
+    return {'mensagem':f" Pedido ID:{pedido.id} Status:{pedido.status} Data:{data_formatada}"}
 
     
 #✅ Adicionar item ao pedido
