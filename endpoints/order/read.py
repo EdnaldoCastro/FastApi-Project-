@@ -9,8 +9,10 @@ router = APIRouter()
 #✅ Listar meus pedidos
 @router.get('/visualizar/meus_pedidos')
 async def visualizar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+
     buscar_pedidos = select(Pedido).where(Pedido.dono_pedido_id == user.id, Pedido.status == 'PENDENTE')
     pedido = session.scalars(buscar_pedidos).all()
+    
     if not pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Você ainda não tem pedidos!')
     return {
