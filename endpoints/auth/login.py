@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from dependencies import get_session
 from sqlalchemy.orm import Session
-from functions import get_token, login_def
-from schemas import  LoginSchema
 
+from dependencies import get_session
+from functions import get_token, login_def
+from schemas import LoginSchema
 
 router = APIRouter()
 

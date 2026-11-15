@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends
-from dependencies import token_verify
-from models import Usuario
-from functions import get_token
 from datetime import timedelta
+
+from fastapi import APIRouter, Depends
+
+from dependencies import token_verify
+from functions import get_token
+from models import Usuario
 
 router = APIRouter()
 

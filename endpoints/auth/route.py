@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 
-
 auth_router = APIRouter(prefix='/auth', tags=['title_auth'])
 
 from endpoints.auth import criar_conta, login, login_form, refresh_token

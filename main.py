@@ -1,11 +1,11 @@
-from fastapi import FastAPI
-from endpoints.order.route import order_router
-from endpoints.auth.route import auth_router
-
 from pathlib import Path
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
 
+from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
+
+from endpoints.auth.route import auth_router
+from endpoints.order.route import order_router
 
 app = FastAPI()
 

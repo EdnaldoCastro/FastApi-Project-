@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from dependencies import get_session
 from sqlalchemy.orm import Session
+
+from dependencies import get_session
+from functions import verificar_email
 from models import Usuario
 from schemas import UsuarioSchema
-from functions import verificar_email
 from security import bcrypt_context
 
 router = APIRouter()
