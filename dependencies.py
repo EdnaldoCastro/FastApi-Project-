@@ -6,8 +6,8 @@ from fastapi import HTTPException, status, Depends
 from sqlalchemy import select
 
 def get_session():
+    Session = sessionmaker(bind=db)
     try:
-        Session = sessionmaker(bind=db)
         session = Session()
         yield session
     finally:
@@ -20,10 +20,15 @@ def token_verify(token = Depends(oauth2_schema), session: Session = Depends(get_
         jwt_decode = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         id_user = jwt_decode.get('sub')
     except JWTError:
-
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Acesso negado verifique a validade do token!')
     filtrar = select(Usuario).where(Usuario.id == id_user)
     usuario = session.scalars(filtrar).first()
+
     if not usuario:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Acesso negado token inválido!')
+
+
+    if not usuario.ativo:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED , detail='Usuário inativo')
+
     return usuario
