@@ -27,7 +27,7 @@ async def remover_item_pedido(id_item_pedido,session : Session = Depends(get_ses
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Você não pode fazer alterações em pedidos cancelados!')
 
     session.delete(item)
-    pedido.caucular_preco()
+    pedido.calcular_preco()
 
     item.produto.quantidade_disponivel += item.quantidade
 

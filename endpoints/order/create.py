@@ -108,7 +108,7 @@ async def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : S
     )
 
     session.add(novo_pedido)
-    pedido.caucular_preco()
+    pedido.calcular_preco()
     session.commit()
     session.refresh(novo_pedido)
 

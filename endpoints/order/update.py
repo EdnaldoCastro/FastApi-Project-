@@ -67,7 +67,7 @@ async def alterar_quantidade(id_item_pedido, quantidade_adicional:int , session 
     item.quantidade += quantidade_adicional
     item.produto.quantidade_disponivel -= quantidade_adicional    
 
-    pedido.caucular_preco()
+    pedido.calcular_preco()
     session.commit()
     return {'mensagem': f'{quantidade_adicional} {item.produto.nome} adicionado com sucesso!'}
 
