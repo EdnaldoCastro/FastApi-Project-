@@ -6,10 +6,9 @@ from fastapi import HTTPException, status, Depends
 from sqlalchemy import select
 
 
+SessionLocal = sessionmaker(bind=db)
 def get_session():
-    SessionLocal = sessionmaker(bind=db)
     session = SessionLocal()
-
     try:
         yield session
     finally:
