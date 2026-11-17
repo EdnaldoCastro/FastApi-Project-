@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends , HTTPException, status
-from dependencies import get_session, token_verify
+from dependencies import get_session, token_access
 from sqlalchemy.orm import Session
 from models import Usuario, Pedido, ItemPedido
 from sqlalchemy import select
@@ -10,7 +10,7 @@ router = APIRouter()
 
 #✅ Atualizar status do pedido
 @router.patch('/mudar_status/{pedido_id}')
-async def mudar_status(pedido_id, status_response: StatusSchema, session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+async def mudar_status(pedido_id, status_response: StatusSchema, session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
     
     buscar_pedido = select(Pedido).where(Pedido.id == pedido_id)   
     pedido = session.scalars(buscar_pedido).first()
@@ -41,7 +41,7 @@ async def mudar_status(pedido_id, status_response: StatusSchema, session : Sessi
 
 #✅ Alterar quantidade
 @router.patch('/alterar_quantidade/{id_item_pedido}')
-async def alterar_quantidade(id_item_pedido, quantidade_adicional:int , session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+async def alterar_quantidade(id_item_pedido, quantidade_adicional:int , session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     buscar_item = select(ItemPedido).where(ItemPedido.id == id_item_pedido)
     item = session.scalars(buscar_item).first()
@@ -73,7 +73,7 @@ async def alterar_quantidade(id_item_pedido, quantidade_adicional:int , session 
 
 #✅ Cancelar pedido
 @router.patch('/cancelar/{pedido_id}')
-async def cancelar(pedido_id, session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+async def cancelar(pedido_id, session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
     buscar_pedidos = select(Pedido).where(Pedido.id == pedido_id)
     pedido = session.scalars(buscar_pedidos).first()
 

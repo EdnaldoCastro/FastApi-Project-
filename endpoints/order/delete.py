@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends , HTTPException, status
-from dependencies import get_session, token_verify
+from dependencies import get_session, token_access
 from sqlalchemy.orm import Session
 from models import Usuario, Pedido, ItemPedido
 from sqlalchemy import select
@@ -9,7 +9,7 @@ router = APIRouter()
 
 #✅ Remover item do pedido
 @router.delete('/remover_item_pedido/{id_item_pedido}')
-async def remover_item_pedido(id_item_pedido,session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+async def remover_item_pedido(id_item_pedido,session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     buscar_item = select(ItemPedido).where(ItemPedido.id == id_item_pedido )
     item = session.scalars(buscar_item).first()

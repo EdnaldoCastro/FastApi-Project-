@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from fastapi import APIRouter, Depends
 
-from dependencies import token_verify
+from dependencies import token_refresh
 from functions import get_token
 from models import Usuario
 
@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get('/refresh_token')
-async def refresh(usuario : Usuario = Depends(token_verify)):
+async def refresh(usuario : Usuario = Depends(token_refresh)):
     refresh_token = get_token(usuario.id, token_type='refresh',ACCESS_TIME=timedelta(days=7))
     return {
         'refresh_token': refresh_token,

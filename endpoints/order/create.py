@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends , HTTPException, status
-from dependencies import get_session, token_verify
+from dependencies import get_session, token_access
 from sqlalchemy.orm import Session
 from models import Usuario, Pedido, ItemPedido, Produto
 from decimal import Decimal
@@ -11,7 +11,7 @@ router = APIRouter()
 
 #✅ Criar pedido
 @router.post('/criar_pedido/admin/{user_id}' )
-async def criar_pedido(user_id,session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+async def criar_pedido(user_id,session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
     '''
     ESSE ENDPOINT PERMITE QUE SOMENTE USUÁRIOS ADMIN CRIEM PEDIDOS
     '''
@@ -40,7 +40,7 @@ async def criar_pedido(user_id,session : Session = Depends(get_session), user : 
 
         
 @router.post('/criar_pedido')
-async def criar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_verify)):
+async def criar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
     
     '''
     PERMITE QUE USUÁRIOS CRIEM PEDIDOS DIRETO DA REQUISIÇÃO COM VALIDAÇÃO DE USUÁRIO E PEDIDOS FEITO
@@ -61,7 +61,7 @@ async def criar_pedido(session : Session = Depends(get_session), user : Usuario 
     
 #✅ Adicionar item ao pedido
 @router.post('/adicionar_itens/{pedido_id}')
-async def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : Session = Depends(get_session),user : Usuario = Depends(token_verify)):
+async def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : Session = Depends(get_session),user : Usuario = Depends(token_access)):
 
     '''
     ADICIONA ITENS EM UM PEDIDO EM ESPECÍFICO O USUÁRIO PODE TER 1 PEDIDO DENTRO DESSE PEDIDO TERÁ VÁRIOS ITENS PEDIDOS
@@ -103,7 +103,7 @@ async def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : S
         pedido_id = pedido_id,
         produto_id = itens_pedidos.produto_id,
         quantidade = itens_pedidos.quantidade,
-        preco_unitario = produto.preco_unitario,
+        preco_pago = produto.preco_unitario,
         observacao = itens_pedidos.observacao
     )
 
@@ -115,4 +115,4 @@ async def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : S
     return {'nome_usuario': novo_pedido.pedido.usuario.nome,
             'produto_nome': produto.nome, 
             'quantidade': novo_pedido.quantidade,
-            'preco_unitario':novo_pedido.preco_unitario}
+            'preco_unitario':novo_pedido.preco_pago}
