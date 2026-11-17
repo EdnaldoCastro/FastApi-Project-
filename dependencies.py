@@ -26,10 +26,13 @@ def token_verify(token_esperado):
             jwt_decode = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
             # Pega ID lembrando que "sub" esta assim proque la na hora de criar um token eu coloquei assim la no funtions.py
-            id_user = jwt_decode.get("sub")
+            id_user = int(jwt_decode.get("sub"))
 
             # Pega o tipo do Token lembrando que "token_type" esta assim proque la na hora de criar um token eu coloquei assim la no funtions.py 
             token_type = jwt_decode.get('token_type')
+
+        except (ValueError ,TypeError):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Payload inválido!')
 
         except JWTError:
             # Vai cair aqui token vez que um token se expira ou quando ele é inválido (alguem tenta com uma SECRET_KET diferente ou algo do tipo)
