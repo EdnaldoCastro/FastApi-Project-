@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Numeric, ForeignKey, Date
+from sqlalchemy import create_engine, Numeric, ForeignKey, Date, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from decimal import Decimal
 from datetime import date
@@ -39,7 +39,7 @@ class Pedido(Base):
     itens: Mapped[list['ItemPedido']] = relationship('ItemPedido', back_populates='pedido')  
     
     
-    def caucular_preco(self):
+    def calcular_preco(self):
         self.preco_total = sum(i.quantidade * i.preco_unitario for i in self.itens)
 
         
@@ -51,7 +51,7 @@ class ItemPedido(Base):
     produto_id : Mapped[int] = mapped_column(ForeignKey('produtos.id'), nullable=False)
     quantidade : Mapped[int] = mapped_column(nullable=False)
     preco_unitario : Mapped[Decimal] = mapped_column(Numeric(10,2), nullable=False)
-    observacao : Mapped[str] = mapped_column(nullable=False)
+    observacao : Mapped[str] = mapped_column(String(50))
 
     pedido: Mapped['Pedido'] = relationship('Pedido', back_populates='itens')
     
