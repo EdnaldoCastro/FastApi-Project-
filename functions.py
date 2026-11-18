@@ -9,7 +9,11 @@ from security import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY, bcrypt_
 
 from fastapi import status, HTTPException
 
-def get_token(id_user, token_type = 'access', ACCESS_TIME = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)):
+def get_token(id_user, token_type = 'access', ACCESS_TIME = None):
+    
+    if ACCESS_TIME is None:
+        ACCESS_TIME = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        
     exp = datetime.now(timezone.utc) + ACCESS_TIME
     dict_info = {'sub': str(id_user),'token_type':token_type,'exp': exp}
     jwt_encode = jwt.encode(dict_info, SECRET_KEY, algorithm=ALGORITHM)
