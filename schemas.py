@@ -1,5 +1,7 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from enum import Enum
+from decimal import Decimal
+
 
 class UsuarioSchema(BaseModel):
     
@@ -7,30 +9,24 @@ class UsuarioSchema(BaseModel):
     email : EmailStr
     senha: str
 
-    model_config = ConfigDict(from_attributes=True)
-
 class LoginSchema(BaseModel):
 
     email: EmailStr
     senha: str
 
-    model_config = ConfigDict(from_attributes=True)
-
 class EnumStatus(str, Enum):
     FINALIZADO = 'FINALIZADO'
     PENDENTE = 'PENDENTE'
+    CANCELADO = 'CANCELADO'
 
 class StatusSchema(BaseModel):
     status : EnumStatus
-    model_config = ConfigDict(from_attributes=True)
 
 class ItemPedidoSchema(BaseModel):
     
     produto_id : int
-    quantidade : int
-    observacao : str
-
-    model_config = ConfigDict(from_attributes=True)
+    quantidade : int =  Field(gt=0)
+    observacao : str | None = None
 
 class Categoria(str, Enum):
     BEBIDA = 'bebida'
@@ -39,4 +35,19 @@ class Categoria(str, Enum):
     SOBREMESA = 'sobremesa'
     HAMBURGERS = 'hamburgers'
     SALGADOS = 'salgados'
+
+
+class ItemPedidoRepsosta(BaseModel):
+
+    nome_usuario : str
+    produto_nome : str
+    quantidade : int
+    preco_unitario : Decimal
+
+
+    
+    
+    
+    
+    
 
