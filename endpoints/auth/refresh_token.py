@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get('/refresh_token')
-async def refresh(usuario : Usuario = Depends(token_refresh)):
+def refresh(usuario : Usuario = Depends(token_refresh)):
     refresh_token = get_token(usuario.id, token_type='refresh',ACCESS_TIME=timedelta(days=7))
     return {
         'refresh_token': refresh_token,

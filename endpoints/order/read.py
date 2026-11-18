@@ -8,7 +8,7 @@ router = APIRouter()
 
 #✅ Listar meus pedidos
 @router.get('/visualizar/meus_pedidos')
-async def visualizar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
+def visualizar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     buscar_pedidos = select(Pedido).where(Pedido.dono_pedido_id == user.id, Pedido.status == 'PENDENTE')
     pedido = session.scalars(buscar_pedidos).all()
@@ -21,7 +21,7 @@ async def visualizar_pedido(session : Session = Depends(get_session), user : Usu
 
 #✅ Buscar um pedido específico
 @router.get('/buscar/{pedido_id}')
-async def buscar_pedido_adm(pedido_id, session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
+def buscar_pedido_adm(pedido_id, session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     if not user.admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa ação!')
@@ -39,7 +39,7 @@ async def buscar_pedido_adm(pedido_id, session : Session = Depends(get_session),
 
 #✅ Visualizar itens do pedido
 @router.get('/visualizar/itens_pedidos')
-async def visualizar_itens(session: Session = Depends(get_session), user : Usuario = Depends(token_access)):
+def visualizar_itens(session: Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     pedido_select = select(Pedido).where(Pedido.dono_pedido_id == user.id, Pedido.status == "PENDENTE")
     pedido = session.scalars(pedido_select).all()
@@ -71,7 +71,7 @@ async def visualizar_itens(session: Session = Depends(get_session), user : Usuar
     return lista_itens
 
 @router.get('/produtos/categoria')
-async def produtos_categoria(categoria: Categoria,session: Session = Depends(get_session), user : Usuario = Depends(token_access)):
+def produtos_categoria(categoria: Categoria,session: Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     if not user.admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Você não tem permissão para essa ação!')

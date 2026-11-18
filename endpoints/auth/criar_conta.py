@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.post('/criar_conta')
-async def criar_conta(usuarioschema: UsuarioSchema, session: Session = Depends(get_session)):
+def criar_conta(usuarioschema: UsuarioSchema, session: Session = Depends(get_session)):
     usuario = verificar_email(usuarioschema.email, session)
     if usuario:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Email ja existente tente login!')

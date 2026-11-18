@@ -4,14 +4,14 @@ from sqlalchemy.orm import Session
 from models import Usuario, Pedido, ItemPedido, Produto
 from decimal import Decimal
 from sqlalchemy import select
-from schemas import ItemPedidoSchema
+from schemas import ItemPedidoSchema,ItemPedidoRepsosta
 
 
 router = APIRouter()
 
 #✅ Criar pedido
 @router.post('/criar_pedido/admin/{user_id}' )
-async def criar_pedido(user_id,session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
+def criar_pedido(user_id,session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
     '''
     ESSE ENDPOINT PERMITE QUE SOMENTE USUÁRIOS ADMIN CRIEM PEDIDOS
     '''
@@ -40,12 +40,10 @@ async def criar_pedido(user_id,session : Session = Depends(get_session), user : 
 
         
 @router.post('/criar_pedido')
-async def criar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
-    
+def criar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_access)):    
     '''
     PERMITE QUE USUÁRIOS CRIEM PEDIDOS DIRETO DA REQUISIÇÃO COM VALIDAÇÃO DE USUÁRIO E PEDIDOS FEITO
     '''
-
     buscar = select(Pedido).where(Pedido.dono_pedido_id == user.id, Pedido.status == "PENDENTE")
     filtrar = session.scalars(buscar).all()
 
@@ -60,8 +58,8 @@ async def criar_pedido(session : Session = Depends(get_session), user : Usuario 
 
     
 #✅ Adicionar item ao pedido
-@router.post('/adicionar_itens/{pedido_id}')
-async def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : Session = Depends(get_session),user : Usuario = Depends(token_access)):
+@router.post('/adicionar_itens/{pedido_id}', response_model = ItemPedidoRepsosta)
+def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : Session = Depends(get_session),user : Usuario = Depends(token_access)):
 
     '''
     ADICIONA ITENS EM UM PEDIDO EM ESPECÍFICO O USUÁRIO PODE TER 1 PEDIDO DENTRO DESSE PEDIDO TERÁ VÁRIOS ITENS PEDIDOS
@@ -112,7 +110,9 @@ async def adicionar_itens(pedido_id, itens_pedidos: ItemPedidoSchema,session : S
     session.commit()
     session.refresh(novo_pedido)
 
-    return {'nome_usuario': novo_pedido.pedido.usuario.nome,
+    return {
+            'nome_usuario': novo_pedido.pedido.usuario.nome,
             'produto_nome': produto.nome, 
             'quantidade': novo_pedido.quantidade,
-            'preco_unitario':novo_pedido.preco_pago}
+            'preco_unitario':novo_pedido.preco_pago,
+        }
