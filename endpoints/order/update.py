@@ -3,13 +3,14 @@ from dependencies import get_session, token_access
 from sqlalchemy.orm import Session
 from models import Usuario, Pedido, ItemPedido
 from sqlalchemy import select
-from schemas import StatusSchema
+from schemas import StatusSchema, PedidoResponse
+from typing import List
 
 router = APIRouter()
 
 
 #✅ Atualizar status do pedido
-@router.patch('/mudar_status/{pedido_id}')
+@router.patch('/mudar_status/{pedido_id}', response_model= List[PedidoResponse])
 def mudar_status(pedido_id, status_response: StatusSchema, session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
     
     buscar_pedido = select(Pedido).where(Pedido.id == pedido_id)   
@@ -72,7 +73,7 @@ def alterar_quantidade(id_item_pedido, quantidade_adicional:int , session : Sess
     return {'mensagem': f'{quantidade_adicional} {item.produto.nome} adicionado com sucesso!'}
 
 #✅ Cancelar pedido
-@router.patch('/cancelar/{pedido_id}')
+@router.patch('/cancelar/{pedido_id}', response_model= List[PedidoResponse])
 def cancelar(pedido_id, session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
     buscar_pedidos = select(Pedido).where(Pedido.id == pedido_id)
     pedido = session.scalars(buscar_pedidos).first()
@@ -92,4 +93,4 @@ def cancelar(pedido_id, session : Session = Depends(get_session), user : Usuario
     pedido.status = "CANCELADO"
     session.commit()
 
-    return {'mensagem':f'Pedido de id {pedido.id} cancelado com sucesso essa ação é irreversível!'}
+    return pedido

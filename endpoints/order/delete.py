@@ -3,12 +3,12 @@ from dependencies import get_session, token_access
 from sqlalchemy.orm import Session
 from models import Usuario, Pedido, ItemPedido
 from sqlalchemy import select
-
+from schemas import RemoveItemResponse
 
 router = APIRouter()
 
 #✅ Remover item do pedido
-@router.delete('/remover_item_pedido/{id_item_pedido}')
+@router.delete('/remover_item_pedido/{id_item_pedido}', response_model=RemoveItemResponse)
 def remover_item_pedido(id_item_pedido,session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     buscar_item = select(ItemPedido).where(ItemPedido.id == id_item_pedido )
@@ -35,4 +35,8 @@ def remover_item_pedido(id_item_pedido,session : Session = Depends(get_session),
     pedido.calcular_preco()
     session.commit()
 
-    return {'mensagem': f'{item.produto.nome} removido com sucesso!'}
+    return {
+            "nome_cliente": pedido.usuario.nome,
+            "preco_atual_pedido":pedido.preco_total ,
+            "produto_removido_nome":item.produto.nome , 
+    }

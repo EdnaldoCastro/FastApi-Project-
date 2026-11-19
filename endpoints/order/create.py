@@ -4,13 +4,13 @@ from sqlalchemy.orm import Session
 from models import Usuario, Pedido, ItemPedido, Produto
 from decimal import Decimal
 from sqlalchemy import select
-from schemas import ItemPedidoSchema,ItemPedidoRepsosta
+from schemas import ItemPedidoSchema,ItemPedidoRepsosta, PedidoResponse
 
 
 router = APIRouter()
 
 #✅ Criar pedido
-@router.post('/criar_pedido/admin/{user_id}' )
+@router.post('/criar_pedido/admin/{user_id}', response_model=PedidoResponse)
 def criar_pedido(user_id,session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
     '''
     ESSE ENDPOINT PERMITE QUE SOMENTE USUÁRIOS ADMIN CRIEM PEDIDOS
@@ -30,16 +30,24 @@ def criar_pedido(user_id,session : Session = Depends(get_session), user : Usuari
     if len(buscar_pedido) >= 3:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Usuários ja tem pedidos pendentes!')
 
-    pedido_adm = Pedido(dono_pedido_id=user_id, status = "PENDENTE",preco_total = Decimal("0.00")) 
-    session.add(pedido_adm)
+    pedido = Pedido(dono_pedido_id=user_id, status = "PENDENTE",preco_total = Decimal("0.00")) 
+    session.add(pedido)
     session.commit()
 
-    session.refresh(pedido_adm)
+    session.refresh(pedido)
 
-    return pedido_adm
+    data_formatada = pedido.data_criacao.strftime("%d/%m/%Y")
+
+    return {
+        "nome_usuario":pedido.usuario.nome ,
+        "id_pedido": pedido.id,
+        "status": pedido.status,
+        "preco_total": pedido.preco_total,
+        "data_criacao": data_formatada,
+    }
 
         
-@router.post('/criar_pedido')
+@router.post('/criar_pedido', response_model = PedidoResponse)
 def criar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_access)):    
     '''
     PERMITE QUE USUÁRIOS CRIEM PEDIDOS DIRETO DA REQUISIÇÃO COM VALIDAÇÃO DE USUÁRIO E PEDIDOS FEITO
@@ -53,9 +61,16 @@ def criar_pedido(session : Session = Depends(get_session), user : Usuario = Depe
     
     session.add(pedido)
     session.commit()
-    data_formatada = pedido.data_criacao.strftime("%d/%m/%Y")
-    return {'mensagem':f" Pedido ID:{pedido.id} Status:{pedido.status} Data:{data_formatada}"}
 
+    data_formatada = pedido.data_criacao.strftime("%d/%m/%Y")
+    
+    return {
+        "nome_usuario":pedido.usuario.nome ,
+        "id_pedido": pedido.id,
+        "status": pedido.status,
+        "preco_total": pedido.preco_total,
+        "data_criacao": data_formatada,
+    }
     
 #✅ Adicionar item ao pedido
 @router.post('/adicionar_itens/{pedido_id}', response_model = ItemPedidoRepsosta)

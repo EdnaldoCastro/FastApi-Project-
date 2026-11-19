@@ -3,11 +3,13 @@ from dependencies import get_session, token_access
 from sqlalchemy.orm import Session
 from models import Usuario, Pedido,ItemPedido, Produto
 from sqlalchemy import select
-from schemas import Categoria
+from schemas import Categoria,PedidosGetResponse, VisualizarResponse, CategoriaResponse
+from typing import List
+
 router = APIRouter()
 
 #✅ Listar meus pedidos
-@router.get('/visualizar/meus_pedidos')
+@router.get('/visualizar/meus_pedidos', response_model=List[PedidosGetResponse])
 def visualizar_pedido(session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     buscar_pedidos = select(Pedido).where(Pedido.dono_pedido_id == user.id, Pedido.status == 'PENDENTE')
@@ -15,12 +17,10 @@ def visualizar_pedido(session : Session = Depends(get_session), user : Usuario =
     
     if not pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Você ainda não tem pedidos!')
-    return {
-        'pedidos': pedido
-    }
+    return pedido
 
 #✅ Buscar um pedido específico
-@router.get('/buscar/{pedido_id}')
+@router.get('/buscar/{pedido_id}', response_model=List[PedidosGetResponse])
 def buscar_pedido_adm(pedido_id, session : Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     if not user.admin:
@@ -32,13 +32,11 @@ def buscar_pedido_adm(pedido_id, session : Session = Depends(get_session), user 
     if not pedido:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Pedido não existe!')
     
-    return {
-        'pedidos': pedido
-    }
+    return pedido
 
 
 #✅ Visualizar itens do pedido
-@router.get('/visualizar/itens_pedidos')
+@router.get('/visualizar/itens_pedidos', response_model= List[VisualizarResponse])
 def visualizar_itens(session: Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     pedido_select = select(Pedido).where(Pedido.dono_pedido_id == user.id, Pedido.status == "PENDENTE")
@@ -61,7 +59,8 @@ def visualizar_itens(session: Session = Depends(get_session), user : Usuario = D
     lista_itens = []
 
     for itens_product in lista:
-        lista_itens.append({'dono_pedido':itens_product.pedido.usuario.nome,
+        lista_itens.append({
+            'dono_pedido':itens_product.pedido.usuario.nome,
             'produto':itens_product.produto.nome,
             'preco_unitario':itens_product.preco_pago,
             'quantidade':itens_product.quantidade,
@@ -70,7 +69,7 @@ def visualizar_itens(session: Session = Depends(get_session), user : Usuario = D
 
     return lista_itens
 
-@router.get('/produtos/categoria')
+@router.get('/produtos/categoria', response_model = List[CategoriaResponse])
 def produtos_categoria(categoria: Categoria,session: Session = Depends(get_session), user : Usuario = Depends(token_access)):
 
     if not user.admin:
@@ -82,6 +81,4 @@ def produtos_categoria(categoria: Categoria,session: Session = Depends(get_sessi
     if not buscar:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Categoria não encontrada!')
 
-    return{
-        'produtos': buscar
-    }
+    return buscar
