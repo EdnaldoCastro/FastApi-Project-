@@ -26,11 +26,13 @@ def remover_item_pedido(id_item_pedido,session : Session = Depends(get_session),
     if pedido.status == "CANCELADO":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Você não pode fazer alterações em pedidos cancelados!')
 
+    pedido.itens.remove(item) # tira da lista usada no cálculo
+
     session.delete(item)
-    pedido.calcular_preco()
+
 
     item.produto.quantidade_disponivel += item.quantidade
-
+    pedido.calcular_preco()
     session.commit()
 
     return {'mensagem': f'{item.produto.nome} removido com sucesso!'}

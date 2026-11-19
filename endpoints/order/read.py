@@ -63,9 +63,9 @@ def visualizar_itens(session: Session = Depends(get_session), user : Usuario = D
     for itens_product in lista:
         lista_itens.append({'dono_pedido':itens_product.pedido.usuario.nome,
             'produto':itens_product.produto.nome,
-            'preco_unitario':itens_product.preco_unitario,
+            'preco_unitario':itens_product.preco_pago,
             'quantidade':itens_product.quantidade,
-            'total':itens_product.preco_unitario * itens_product.quantidade 
+            'total':itens_product.preco_pago * itens_product.quantidade 
             })
 
     return lista_itens
