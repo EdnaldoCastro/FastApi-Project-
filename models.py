@@ -84,7 +84,7 @@ class Produto(Base):
     __table_args__ = (
             CheckConstraint("preco_unitario >= 0", name="cnk_preco_unitario"),
             CheckConstraint("quantidade_disponivel>= 0", name="cnk_quantidade_disponivel"),
-            CheckConstraint("categoria IN ('bebida', 'sucos', 'pizza', 'sobremesa', 'hamburgers', 'salgado')",  name='cnk_categoria'),
+            CheckConstraint("categoria IN ('bebida', 'sucos', 'pizza', 'sobremesa', 'hamburgers', 'salgados')",  name='cnk_categoria'),
     )
 
     itens_pedidos: Mapped[list['ItemPedido']] = relationship('ItemPedido', back_populates='produto')
