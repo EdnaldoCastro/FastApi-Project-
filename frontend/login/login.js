@@ -1,5 +1,5 @@
 const form = document.getElementById('form-login');
-const msg = document.getElementById('mensagem');
+const mensagem = document.getElementById('mensagem');
 
 form.addEventListener('submit', async function(evento) {
     evento.preventDefault();
@@ -12,22 +12,35 @@ form.addEventListener('submit', async function(evento) {
         senha: senhaDigitado
     }
 
-    console.log(dadosLogin);
+    try{
+        const response = await fetch("/auth/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(dadosLogin)
+        });
 
-    const resposta = await fetch("/auth/login", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(dadosLogin)
-    });
+        const dados = await response.json();
 
-    const dados = await resposta.json();
+        if (response.status == 401){
+            mensagem.textContent = "Email ou senha inválidos!"
+            return; 
+        }  
 
-    if (!resposta.ok){
-        msg.textContent = dados.detail;
-        return; 
-    }  
+        if (response.status ==  500){
+            mensagem.textContent = "Erro no servidor interno!"
+            return; 
+        }  
 
+        if (!response.ok){
+            mensagem.textContent = 'Não foi possível realizar o login!'
+            return
+        }
 
-    sessionStorage.setItem("access-token", dados.access_token);
-    window.location.href = "/front/pedidos/pedidos.html"
+        sessionStorage.setItem("access-token", dados.access_token);
+        window.location.replace("/front/pedidos/pedidos.html")
+        
+
+       } catch{
+        mensagem.textContent = "Erro no servidor!"
+    }
 })
